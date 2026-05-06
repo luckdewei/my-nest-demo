@@ -1,0 +1,57 @@
+// prisma/schema.prisma
+
+// ─────────────────────────────────────────────────────────
+// generator 配置
+// Prisma 7 核心变化：
+//   provider 从 "prisma-client-js" 改为 "prisma-client"
+//   output 必须指定，生成到项目 src 目录下
+//   moduleFormat = "cjs" 是 NestJS 必须加的配置
+//     原因：Prisma 7 默认生成 ESM 格式，而 NestJS 使用 CommonJS
+//     不加这行会导致启动报错：Cannot use import statement in a module
+// ─────────────────────────────────────────────────────────
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+// ─────────────────────────────────────────────────────────
+// datasource 配置
+// Prisma 7 变化：url 移到 prisma.config.ts 里配置
+// 这里只保留 provider，不再写 url = env("DATABASE_URL")
+// ─────────────────────────────────────────────────────────
+datasource db {
+  provider = "postgresql"
+}
+
+// ─────────────────────────────────────────────────────────
+// User 模型 → 对应数据库 users 表
+// ─────────────────────────────────────────────────────────
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String
+  password  String
+  role      String   @default("user")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  posts     Post[]
+
+  @@map("users")
+}
+
+// ─────────────────────────────────────────────────────────
+// Post 模型 → 对应数据库 posts 表
+// ─────────────────────────────────────────────────────────
+model Post {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String   @db.Text
+  published Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  authorId  Int
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@map("posts")
+}
