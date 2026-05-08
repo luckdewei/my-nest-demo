@@ -13,7 +13,18 @@ import { RagModule } from './rag/rag.module';
 import { FunctionCallingModule } from './function-calling/function-calling.module';
 
 @Module({
-  imports: [PrismaModule, UserModule, PostModule, ModelsModule, PromptsModule, ChainsModule, AgentsModule, MemoryModule, RagModule, FunctionCallingModule],
+  imports: [
+    PrismaModule,
+    UserModule,
+    PostModule,
+    ModelsModule,
+    PromptsModule,
+    ChainsModule,
+    AgentsModule,
+    MemoryModule,
+    RagModule,
+    FunctionCallingModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

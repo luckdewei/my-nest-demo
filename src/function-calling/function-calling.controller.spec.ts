@@ -9,7 +9,9 @@ describe('FunctionCallingController', () => {
       controllers: [FunctionCallingController],
     }).compile();
 
-    controller = module.get<FunctionCallingController>(FunctionCallingController);
+    controller = module.get<FunctionCallingController>(
+      FunctionCallingController,
+    );
   });
 
   it('should be defined', () => {

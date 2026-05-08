@@ -4,6 +4,6 @@ import { MemoryService } from './memory.service';
 
 @Module({
   controllers: [MemoryController],
-  providers: [MemoryService]
+  providers: [MemoryService],
 })
 export class MemoryModule {}

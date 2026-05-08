@@ -4,6 +4,6 @@ import { FunctionCallingService } from './function-calling.service';
 
 @Module({
   controllers: [FunctionCallingController],
-  providers: [FunctionCallingService]
+  providers: [FunctionCallingService],
 })
 export class FunctionCallingModule {}
