@@ -9,7 +9,9 @@ import {
   AIMessage,
   ToolMessage,
   SystemMessage,
+  type BaseMessage,
 } from '@langchain/core/messages';
+import type { StructuredToolInterface } from '@langchain/core/tools';
 import { config } from '../config';
 
 @Injectable()
@@ -32,7 +34,7 @@ export class AgentsService {
 
   // ── 工具一：查询商品库存和价格 ──────────────────────────
   private checkProductTool = tool(
-    async ({ productName }: { productName: string }) => {
+    ({ productName }: { productName: string }) => {
       console.log(`[工具执行] check_product → 查询商品：${productName}`);
 
       // 模拟商品数据库（实际项目注入 PrismaService 查真实数据库）
@@ -73,7 +75,7 @@ export class AgentsService {
 
   // ── 工具二：创建订单 ────────────────────────────────────
   private createOrderTool = tool(
-    async ({
+    ({
       productName,
       quantity,
       customerName,
@@ -115,7 +117,7 @@ export class AgentsService {
 
   // ── 工具三：查询订单状态 ────────────────────────────────
   private checkOrderTool = tool(
-    async ({ orderId }: { orderId: string }) => {
+    ({ orderId }: { orderId: string }) => {
       console.log(`[工具执行] check_order → 查询订单：${orderId}`);
 
       // 模拟订单状态（实际项目查数据库）
@@ -137,7 +139,7 @@ export class AgentsService {
 
   // ── 工具四：申请退款 ────────────────────────────────────
   private applyRefundTool = tool(
-    async ({ orderId, reason }: { orderId: string; reason: string }) => {
+    ({ orderId, reason }: { orderId: string; reason: string }) => {
       console.log(`[工具执行] apply_refund → 订单 ${orderId}，原因：${reason}`);
 
       const refundId = `REF-${Date.now().toString().slice(-6)}`;
@@ -165,7 +167,7 @@ export class AgentsService {
       this.applyRefundTool,
     ];
 
-    const toolMap: Record<string, any> = {
+    const toolMap: Record<string, StructuredToolInterface> = {
       check_product: this.checkProductTool,
       create_order: this.createOrderTool,
       check_order: this.checkOrderTool,
@@ -177,7 +179,7 @@ export class AgentsService {
     const llmWithTools = this.llm.bindTools(tools);
 
     // 消息历史：Agent 每一轮都能看到完整的对话 + 工具结果
-    const messages: any[] = [
+    const messages: BaseMessage[] = [
       // System 消息：设定客服角色和行为规范
       new SystemMessage(
         `你是「极速购」电商平台的 AI 智能客服助手。
@@ -212,7 +214,7 @@ export class AgentsService {
 
       // tool_calls 为空 → 模型有了最终答案，退出循环
       if (!response.tool_calls || response.tool_calls.length === 0) {
-        steps.push(`💬 [最终回答] ${response.content}`);
+        steps.push(`💬 [最终回答] ${response.content as string}`);
         break;
       }
 
@@ -234,7 +236,9 @@ export class AgentsService {
         }
 
         // 执行工具，获取结果
-        const toolResult = await toolFn.invoke(toolCall.args);
+        const toolResult: string = (await toolFn.invoke(
+          toolCall.args,
+        )) as string;
         steps.push(`✅ [工具结果] ${toolResult}`);
         console.log(`[工具结果] ${toolResult}`);
 
@@ -242,7 +246,7 @@ export class AgentsService {
         // 模型下一轮看到结果后，再决定继续调工具还是直接回答
         messages.push(
           new ToolMessage({
-            content: String(toolResult),
+            content: toolResult,
             tool_call_id: toolCall.id!,
           }),
         );
@@ -256,7 +260,7 @@ export class AgentsService {
       userMessage,
       steps, // 完整思考和执行步骤（录视频演示重点）
       totalRounds: roundCount,
-      answer: lastAI?.content ?? '抱歉，暂时无法处理您的请求',
+      answer: lastAI ?? '抱歉，暂时无法处理您的请求',
     };
   }
 }
