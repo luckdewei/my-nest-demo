@@ -252,7 +252,6 @@ export class AgentsService {
         );
       }
     }
-
     // 获取最终回答（最后一条 AIMessage 的内容）
     const lastAI = [...messages].reverse().find((m) => m instanceof AIMessage);
 
@@ -260,7 +259,7 @@ export class AgentsService {
       userMessage,
       steps, // 完整思考和执行步骤（录视频演示重点）
       totalRounds: roundCount,
-      answer: lastAI ?? '抱歉，暂时无法处理您的请求',
+      answer: lastAI!.content ?? '抱歉，暂时无法处理您的请求',
     };
   }
 }

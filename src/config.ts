@@ -6,7 +6,7 @@ export const config = {
 
     // 对话模型：qwen3.5:0.8b（约 1GB）
     // 拉取命令：ollama pull qwen3.5:0.8b
-    chatModel: 'qwen3.5:1.7b',
+    chatModel: 'gpt-oss:120b-cloud',
 
     // 向量化模型：mxbai-embed-large（RAG 检索用，约 669MB）
     // 拉取命令：ollama pull mxbai-embed-large
